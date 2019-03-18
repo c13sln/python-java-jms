@@ -7,6 +7,8 @@ import javax.jms.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+
 @ResourceAdapter("lokal-mq")
 @MessageDriven(activationConfig = {@ActivationConfigProperty(propertyName = "destination", propertyValue = "exempel"),
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
@@ -27,16 +29,14 @@ public class StompConsumer implements MessageListener {
             }
         } else {
             BytesMessage bm = (BytesMessage) message;
-            byte data[] = new byte[0];
             try {
-                data = new byte[(int) bm.getBodyLength()];
+                byte[] data = new byte[(int) bm.getBodyLength()];
                 bm.readBytes(data);
+                String s = new String(data, StandardCharsets.UTF_8);
+                LOG.info("Breaking News: {}", s);
             } catch (JMSException e) {
                 LOG.error("Textmeddelande kunde inte utläsas: {}", e);
             }
-            String s = new String(data);
-            LOG.info("Breaking News: {}", s);
-
         }
     }
 }
